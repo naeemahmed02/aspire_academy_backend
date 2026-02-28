@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # External apps
-    'accounts'
+    'accounts',
     'academics',
     'questions',
 ]
