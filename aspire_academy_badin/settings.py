@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'accounts',
     'academics',
     'questions',
+    'progress',
+    'quizzes',
 ]
 
 MIDDLEWARE = [
