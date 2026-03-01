@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from academics.models import SubTopic
+from accounts.models import Account
 
 
 class Question(models.Model):
@@ -18,7 +20,7 @@ class Question(models.Model):
     # Core Question
     question_text = models.TextField()
     sub_topic = models.ForeignKey(
-        "SubTopic",
+        SubTopic,
         on_delete=models.CASCADE,
         related_name="questions",
         db_index=True
@@ -60,7 +62,7 @@ class Question(models.Model):
     )
 
     created_by = models.ForeignKey(
-        'Account',
+        Account,
         on_delete=models.SET_NULL,
         null=True,
         related_name='created_questions'

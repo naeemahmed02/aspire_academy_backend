@@ -1,9 +1,9 @@
 from django.db import models
-
+from accounts.models import Account
 
 class AcademicBaseClass(models.Model):
     created_by = models.ForeignKey(
-        "Account",
+        Account,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
