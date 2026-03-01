@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'questions',
     'progress',
     'quizzes',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -42,6 +43,15 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'aspire_academy_badin.urls'
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
 
 TEMPLATES = [
     {
