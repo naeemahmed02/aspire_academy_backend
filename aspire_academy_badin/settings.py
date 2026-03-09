@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'progress',
     'quizzes',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +65,17 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "10/min",
         "user": "100/min",
+        "auth": "5/min",
     },
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,  # Enable blacklist
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 TEMPLATES = [
