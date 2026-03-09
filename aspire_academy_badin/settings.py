@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'quizzes',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -67,6 +68,10 @@ REST_FRAMEWORK = {
         "user": "100/min",
         "auth": "5/min",
     },
+
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend"
+    ]
 }
 
 

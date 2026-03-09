@@ -1,37 +1,48 @@
 from rest_framework import serializers
-from django.db import IntegrityError
+from rest_framework.validators import UniqueTogetherValidator
+
 from .models import Subject, MainTopic, SubTopic
 
 
 # SubTopic Serializers
 
 class SubTopicWriteSerializer(serializers.ModelSerializer):
+    """
+    Serializer used for create/update operations.
+    Ensures a sub-topic name is unique within a main topic.
+    """
+
     class Meta:
         model = SubTopic
-
         fields = [
-            'id',
-            'main_topic',
-            'sub_topic_name',
-            'sub_topic_description',
+            "id",
+            "main_topic",
+            "sub_topic_name",
+            "sub_topic_description",
         ]
-        read_only_fields = ['id']
+        read_only_fields = ["id"]
 
-    def validate(self, attrs):
-        main_topic = attrs.get("main_topic")
-        name = attrs.get("sub_topic_name")
-
-        if SubTopic.objects.filter(
-            main_topic = main_topic,
-            sub_topic = name
-        ).exists():
-            raise serializers.ValidationError(
-                {"sub_topic_name": "This sub-topic already exists for this main topic."}
+        validators = [
+            UniqueTogetherValidator(
+                queryset=SubTopic.objects.all(),
+                fields=["main_topic", "sub_topic_name"],
+                message="This sub-topic already exists for this main topic."
             )
-        
-        return attrs
-    
+        ]
+
+    def validate_sub_topic_name(self, value):
+        """
+        Normalize input to avoid duplicates like:
+        'Neural Networks', 'neural networks', 'Neural Networks '
+        """
+        return value.strip()
+
+
 class SubTopicReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer used for detailed read operations.
+    """
+
     class Meta:
         model = SubTopic
         fields = [
@@ -40,15 +51,29 @@ class SubTopicReadSerializer(serializers.ModelSerializer):
             "sub_topic_description",
         ]
 
+
 class SubTopicListSerializer(serializers.ModelSerializer):
+    """
+    Lightweight serializer for dropdowns or lists.
+    """
+
     class Meta:
         model = SubTopic
-        fields = ["id", "sub_topic_name"]
+        fields = [
+            "id",
+            "sub_topic_name",
+        ]
 
 
 # MainTopic Serializers
 
+
 class MainTopicWriteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for create/update operations on MainTopic.
+    Ensures uniqueness within a subject.
+    """
+
     class Meta:
         model = MainTopic
         fields = [
@@ -59,21 +84,24 @@ class MainTopicWriteSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id"]
 
-    def validate(self, attrs):
-        subject = attrs.get("subject")
-        name = attrs.get("topic_name")
-
-        if MainTopic.objects.filter(
-            subject= subject,
-            topic_name = name
-        ).exists():
-            raise serializers.ValidationError(
-                {"topic_name": "This topic already exists for this subject."}
+        validators = [
+            UniqueTogetherValidator(
+                queryset=MainTopic.objects.all(),
+                fields=["subject", "topic_name"],
+                message="This topic already exists for this subject."
             )
-        return attrs
-    
-class MainTopicReadSerialzier(serializers.ModelSerializer):
-    sub_topics = SubTopicReadSerializer(manay = True, read_only=True)
+        ]
+
+    def validate_topic_name(self, value):
+        return value.strip()
+
+
+class MainTopicReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer for detailed topic view including subtopics.
+    """
+
+    sub_topics = SubTopicReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = MainTopic
@@ -85,28 +113,84 @@ class MainTopicReadSerialzier(serializers.ModelSerializer):
         ]
 
 
-class MainTopicSerializer(serializers.ModelSerializer):
+class MainTopicListSerializer(serializers.ModelSerializer):
+    """
+    Lightweight serializer for lists or dropdowns.
+    """
+
     class Meta:
         model = MainTopic
-        fields = ["id", "topic_name"]
+        fields = [
+            "id",
+            "topic_name",
+        ]
 
 
 # Subject Serializers
 
+
 class SubjectWriteSerializer(serializers.ModelSerializer):
+    """
+    Serializer used for create/update subject operations.
+    Ensures subject name is unique (case insensitive).
+    """
+
     class Meta:
         model = Subject
         fields = [
             "id",
             "subject_name",
             "subject_code",
-            "subject_description"
+            "subject_description",
         ]
         read_only_fields = ["id"]
 
     def validate_subject_name(self, value):
-        if Subject.objects.filter(subject_name=value).exists():
+        """
+        Prevent duplicate subject names.
+        Case-insensitive validation.
+        """
+        value = value.strip()
+
+        queryset = Subject.objects.filter(subject_name__iexact=value)
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
             raise serializers.ValidationError(
                 "A subject with this name already exists."
             )
+
         return value
+
+
+class SubjectReadSerializer(serializers.ModelSerializer):
+    """
+    Detailed serializer including nested topics.
+    """
+
+    main_topics = MainTopicReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Subject
+        fields = [
+            "id",
+            "subject_name",
+            "subject_code",
+            "subject_description",
+            "main_topics",
+        ]
+
+
+class SubjectListSerializer(serializers.ModelSerializer):
+    """
+    Lightweight serializer for dropdowns or lists.
+    """
+
+    class Meta:
+        model = Subject
+        fields = [
+            "id",
+            "subject_name",
+        ]
