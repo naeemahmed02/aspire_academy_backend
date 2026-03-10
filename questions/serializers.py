@@ -42,9 +42,7 @@ class QuestionWriteSerializer(serializers.ModelSerializer):
             )
         ]
 
-    # --------------------------------------------------------
-    # Normalize Text Inputs
-    # --------------------------------------------------------
+# Normalize Text Inputs
 
     def validate_question_text(self, value):
         return value.strip()
@@ -61,9 +59,8 @@ class QuestionWriteSerializer(serializers.ModelSerializer):
     def validate_option_d(self, value):
         return value.strip()
 
-    # --------------------------------------------------------
-    # Cross-field validation
-    # --------------------------------------------------------
+# Cross-field validation
+
 
     def validate(self, attrs):
         option_map = {

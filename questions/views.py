@@ -55,9 +55,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     ordering = ["-created_at"]
 
-    # ---------------------------------------------------------
+    
     # Dynamic Serializer Selection
-    # ---------------------------------------------------------
+    
     def get_serializer_class(self):
 
         if self.action == "list":
@@ -68,8 +68,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
         return QuestionWriteSerializer
 
-    # ---------------------------------------------------------
+    
     # Automatically assign creator
-    # ---------------------------------------------------------
+    
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
