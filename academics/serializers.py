@@ -52,21 +52,26 @@ class SubTopicReadSerializer(serializers.ModelSerializer):
         ]
 
 
+
+
 class SubTopicListSerializer(serializers.ModelSerializer):
     """
     Lightweight serializer for dropdowns or lists.
     """
+    main_topic = serializers.IntegerField(source="main_topic.id", read_only=True)
+    main_topic_name = serializers.CharField(source="main_topic.topic_name", read_only=True)
 
     class Meta:
         model = SubTopic
         fields = [
             "id",
             "sub_topic_name",
+            "main_topic",
+            "main_topic_name",
         ]
 
 
 # MainTopic Serializers
-
 
 class MainTopicWriteSerializer(serializers.ModelSerializer):
     """
@@ -113,22 +118,25 @@ class MainTopicReadSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class MainTopicListSerializer(serializers.ModelSerializer):
     """
     Lightweight serializer for lists or dropdowns.
     """
+    subject = serializers.IntegerField(source="subject.id", read_only=True)
+    subject_name = serializers.CharField(source="subject.subject_name", read_only=True)
 
     class Meta:
         model = MainTopic
         fields = [
             "id",
             "topic_name",
+            "subject",
+            "subject_name",
         ]
 
 
 # Subject Serializers
-
-
 class SubjectWriteSerializer(serializers.ModelSerializer):
     """
     Serializer used for create/update subject operations.
@@ -142,6 +150,7 @@ class SubjectWriteSerializer(serializers.ModelSerializer):
             "subject_name",
             "subject_code",
             "subject_description",
+            "sub_image",
         ]
         read_only_fields = ["id"]
 
@@ -170,6 +179,16 @@ class SubjectReadSerializer(serializers.ModelSerializer):
     Detailed serializer including nested topics.
     """
 
+    sub_image = serializers.SerializerMethodField()
+
+    def get_sub_image(self, obj):
+        request = self.context.get("request")
+        if obj.sub_image:
+            if request:
+                return request.build_absolute_uri(obj.sub_image.url)
+            return obj.sub_image.url
+        return None
+
     main_topics = MainTopicReadSerializer(many=True, read_only=True)
 
     class Meta:
@@ -180,6 +199,7 @@ class SubjectReadSerializer(serializers.ModelSerializer):
             "subject_code",
             "subject_description",
             "main_topics",
+            "sub_image",
         ]
 
 
@@ -188,9 +208,18 @@ class SubjectListSerializer(serializers.ModelSerializer):
     Lightweight serializer for dropdowns or lists.
     """
 
+    def get_sub_image(self, obj):
+        request = self.context.get("request")
+        if obj.sub_image:
+            if request:
+                return request.build_absolute_uri(obj.sub_image.url)
+            return obj.sub_image.url
+        return None
+
     class Meta:
         model = Subject
         fields = [
             "id",
             "subject_name",
+            'sub_image'
         ]

@@ -60,9 +60,9 @@ class QuizAttemptAdmin(admin.ModelAdmin):
         "student",
         "sub_topic",
         "total_questions",
-        "total_marks",
-        "negative_marking_flag",
-        "negative_marking",
+        # "total_marks",
+        # "negative_marking_flag",
+        # "negative_marking",
         "time_limit",
         "started_at",
         "completed_at",
@@ -83,9 +83,9 @@ class QuizAttemptAdmin(admin.ModelAdmin):
         ("Configuration Snapshot", {
             "fields": (
                 "total_questions",
-                "total_marks",
-                "negative_marking_flag",
-                "negative_marking",
+                # "total_marks",
+                # "negative_marking_flag",
+                # "negative_marking",
                 "time_limit",
             )
         }),

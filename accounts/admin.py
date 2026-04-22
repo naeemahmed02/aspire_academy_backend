@@ -56,6 +56,7 @@ class AccountAdmin(UserAdmin):
         "username",
         "first_name",
         "last_name",
+        'student_id',
         "is_teacher",
         "is_student",
         "is_staff",

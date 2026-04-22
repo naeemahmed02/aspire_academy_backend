@@ -20,6 +20,7 @@ class Subject(AcademicBaseClass):
     subject_name = models.CharField(max_length=100, db_index=True)
     subject_code = models.CharField(max_length=20, null=True, blank=True, db_index=True)
     subject_description = models.TextField(null=True, blank=True)
+    sub_image = models.ImageField(upload_to="subject_images/", null=True, blank=True)
 
     class Meta:
         verbose_name = "Subject"

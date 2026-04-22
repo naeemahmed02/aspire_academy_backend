@@ -90,39 +90,78 @@ class QuestionWriteSerializer(serializers.ModelSerializer):
 # Used for detailed question retrieval
 
 
-class QuestionReadSerializer(serializers.ModelSerializer):
-    """
-    Detailed serializer for retrieving a single question.
-    """
+# class QuestionReadSerializer(serializers.ModelSerializer):
+#     """
+#     Detailed serializer for retrieving a single question.
+#     """
 
+#     sub_topic_name = serializers.CharField(
+#         source="sub_topic.sub_topic_name",
+#         read_only=True
+#     )
+
+#     created_by = serializers.StringRelatedField()
+
+#     class Meta:
+#         model = Question
+#         fields = [
+#             "id",
+#             "question_text",
+#             "sub_topic",
+#             "sub_topic_name",
+#             "option_a",
+#             "option_b",
+#             "option_c",
+#             "option_d",
+#             "correct_answer",
+#             "hint",
+#             "explanation",
+#             "difficulty",
+#             "status",
+#             "created_by",
+#             "created_at",
+#             "updated_at",
+#         ]
+
+
+class QuestionReadSerializer(serializers.ModelSerializer):
+    options = serializers.SerializerMethodField()
+    answer = serializers.SerializerMethodField()
     sub_topic_name = serializers.CharField(
         source="sub_topic.sub_topic_name",
         read_only=True
     )
-
-    created_by = serializers.StringRelatedField()
 
     class Meta:
         model = Question
         fields = [
             "id",
             "question_text",
-            "sub_topic",
-            "sub_topic_name",
-            "option_a",
-            "option_b",
-            "option_c",
-            "option_d",
-            "correct_answer",
+            "options",      
+            "answer",       
             "hint",
             "explanation",
             "difficulty",
-            "status",
-            "created_by",
-            "created_at",
-            "updated_at",
+            "sub_topic_name",
+            
         ]
 
+    def get_options(self, obj):
+        return [
+            obj.option_a,
+            obj.option_b,
+            obj.option_c,
+            obj.option_d,
+        ]
+
+    def get_answer(self, obj):
+        mapping = {
+            'A': 0,
+            'B': 1,
+            'C': 2,
+            'D': 3,
+        }
+        return mapping.get(obj.correct_answer, 0)
 
 
 # Question List Serializer

@@ -27,7 +27,6 @@ class AuthRateThrottle(UserRateThrottle):
     scope = "auth"
 
 
-
 # Register View
 
 class RegisterView(APIView):
@@ -97,7 +96,6 @@ class ProfileView(APIView):
 
 
 # Change Password View
-
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [AuthRateThrottle]
@@ -145,7 +143,7 @@ class LogoutView(APIView):
         try:
             token = RefreshToken(refresh_token)
 
-            # 🔐 Validate token ownership
+            # Validate token ownership
             if token["user_id"] != request.user.id:
                 logger.warning(
                     f"Token ownership mismatch for user {request.user.id}"

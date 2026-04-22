@@ -5,6 +5,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.utils import timezone
+from . utils.unique_student_id_generator import generate_student_id
 
 
 class CustomAccountManager(BaseUserManager):
@@ -84,7 +85,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
     """
     Custom User Model
     """
-
     # Basic Info
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
@@ -95,6 +95,14 @@ class Account(AbstractBaseUser, PermissionsMixin):
         unique=True,
         null=True,
         blank=True,
+    )
+
+    # unique student_id
+    student_id = models.CharField(
+        max_length = 20,
+        unique = True,
+        blank = True,
+        null = True,
     )
 
     # Role Flags
@@ -119,6 +127,16 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = "Accounts"
         ordering = ["-date_joined"]
 
+    def save(self, *args, **kwargs):
+        if not self.student_id:
+            while True:
+                new_id = generate_student_id()
+                if not Account.objects.filter(student_id=new_id).exists():
+                    self.student_id = new_id
+                    break
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.email
 
@@ -133,3 +151,4 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
+

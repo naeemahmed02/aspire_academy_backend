@@ -15,7 +15,7 @@ class SubjectAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (None, {
-            "fields": ("subject_name", "subject_code", "subject_description")
+            "fields": ("subject_name", "subject_code", "subject_description", "sub_image")
         }),
         ("Audit Info", {
             "fields": ("created_by", "created_at", "updated_at"),

@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Subject, MainTopic, SubTopic
 from .serializers import (
@@ -20,6 +21,7 @@ from .serializers import (
 class SubjectViewSet(viewsets.ModelViewSet):
 
     queryset = Subject.objects.all().prefetch_related("main_topics__sub_topics")
+    parser_classes = [MultiPartParser, FormParser]
     permission_classes = [permissions.IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -27,23 +29,22 @@ class SubjectViewSet(viewsets.ModelViewSet):
     ordering_fields = ["subject_name", "created_at"]
 
     def get_serializer_class(self):
-
-        if self.action in ["list"]:
+        if self.action == "list":
             return SubjectListSerializer
-
-        if self.action in ["retrieve"]:
+        if self.action == "retrieve":
             return SubjectReadSerializer
-
         return SubjectWriteSerializer
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
-
 # MAIN TOPIC VIEWSET
 class MainTopicViewSet(viewsets.ModelViewSet):
 
-    queryset = MainTopic.objects.all().prefetch_related("sub_topics")
+    queryset = MainTopic.objects.all().select_related("subject").prefetch_related("sub_topics")
     permission_classes = [permissions.IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend]
@@ -66,7 +67,7 @@ class MainTopicViewSet(viewsets.ModelViewSet):
 # SUB TOPIC VIEWSET
 class SubTopicViewSet(viewsets.ModelViewSet):
 
-    queryset = SubTopic.objects.all()
+    queryset = SubTopic.objects.all().select_related("main_topic", "main_topic__subject")
     permission_classes = [permissions.IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend]

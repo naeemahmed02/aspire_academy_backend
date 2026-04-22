@@ -1,53 +1,216 @@
+# from rest_framework import serializers
+# from .models import QuizAttempt, StudentAnswer
+
+
+# # =========================================================
+# # 🔹 STUDENT ANSWER SERIALIZERS
+# # =========================================================
+
+# class StudentAnswerWriteSerializer(serializers.ModelSerializer):
+#     """
+#     Submit answer serializer (production safe)
+#     """
+
+#     class Meta:
+#         model = StudentAnswer
+#         fields = [
+#             "question",
+#             "selected_option",
+#             "time_taken",
+#         ]
+
+#     def validate(self, attrs):
+#         request = self.context.get("request")
+#         attempt = self.context.get("attempt")
+
+#         question = attrs["question"]
+
+#         # 🔒 Ensure attempt exists
+#         if not attempt:
+#             raise serializers.ValidationError("Invalid attempt")
+
+#         # 🔒 Check ownership
+#         if attempt.student != request.user:
+#             raise serializers.ValidationError("Not allowed")
+
+#         # 🔒 Check quiz status
+#         if attempt.status != "IN_PROGRESS":
+#             raise serializers.ValidationError("Quiz already completed")
+
+#         # 🔒 Ensure question belongs to this attempt
+#         if not attempt.questions.filter(id=question.id).exists():
+#             raise serializers.ValidationError("Invalid question for this attempt")
+
+#         # 🔒 Prevent duplicate answer
+#         if StudentAnswer.objects.filter(
+#             quiz_attempt=attempt,
+#             question=question
+#         ).exists():
+#             raise serializers.ValidationError("Already answered")
+
+#         return attrs
+
+
+# class StudentAnswerReadSerializer(serializers.ModelSerializer):
+#     question_text = serializers.CharField(
+#         source="question.question_text",
+#         read_only=True
+#     )
+
+#     class Meta:
+#         model = StudentAnswer
+#         fields = [
+#             "id",
+#             "question",
+#             "question_text",
+#             "selected_option",
+#             "is_correct",
+#             "marks_awarded",
+#             "time_taken",
+#             "answered_at",
+#         ]
+
+
+# # =========================================================
+# # 🔹 QUIZ ATTEMPT SERIALIZERS
+# # =========================================================
+
+# class QuizAttemptCreateSerializer(serializers.ModelSerializer):
+#     """
+#     Start quiz
+#     """
+#     sub_topic_name = serializers.CharField(
+#         source="sub_topic.sub_topic_name",
+#         read_only=True
+#     )
+
+#     class Meta:
+#         model = QuizAttempt
+#         fields = [
+#             "id",
+#             "sub_topic",
+#             'sub_topic_name',
+#             "total_questions",
+#             "time_limit",
+#         ]
+#         read_only_fields = ["id"]
+
+#     # def create(self, validated_data):
+#     #     user = self.context["request"].user
+
+#     #     return QuizAttempt.objects.create(
+#     #         student=user,
+#     #         **validated_data
+#     #     )
+
+
+# class QuizAttemptListSerializer(serializers.ModelSerializer):
+#     sub_topic_name = serializers.CharField(
+#         source="sub_topic.sub_topic_name",
+#         read_only=True
+#     )
+
+#     duration_taken = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = QuizAttempt
+#         fields = [
+#             "id",
+#             "sub_topic_name",
+#             "score",
+#             "accuracy",
+#             "status",
+#             "started_at",
+#             "completed_at",
+#             "duration_taken",
+#         ]
+
+#     def get_duration_taken(self, obj):
+#         if obj.completed_at:
+#             return (obj.completed_at - obj.started_at).seconds
+#         return None
+
+
+# class QuizAttemptDetailSerializer(serializers.ModelSerializer):
+#     answers = StudentAnswerReadSerializer(many=True, read_only=True)
+
+#     sub_topic_name = serializers.CharField(
+#         source="sub_topic.sub_topic_name",
+#         read_only=True
+#     )
+
+#     duration_taken = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = QuizAttempt
+#         fields = [
+#             "id",
+#             "sub_topic",
+#             "sub_topic_name",
+#             "total_questions",
+#             "time_limit",
+
+#             "started_at",
+#             "completed_at",
+
+#             "score",
+#             "correct_answers",
+#             "wrong_answers",
+#             "skipped_questions",
+#             "accuracy",
+#             "status",
+
+#             "duration_taken",
+#             "answers",
+#         ]
+
+#     def get_duration_taken(self, obj):
+#         if obj.completed_at:
+#             return (obj.completed_at - obj.started_at).seconds
+#         return None
+
+
+
+
+
+
 from rest_framework import serializers
-from django.utils import timezone
-
 from .models import QuizAttempt, StudentAnswer
-from questions.models import Question
 
 
 
-# Student Answer Serializers
-
-
+# STUDENT ANSWER (WRITE)
 class StudentAnswerWriteSerializer(serializers.ModelSerializer):
     """
-    Serializer used when a student submits an answer.
+    ONLY validates input structure.
+    Business rules are handled in service layer.
     """
 
     class Meta:
         model = StudentAnswer
         fields = [
-            "id",
-            "quiz_attempt",
             "question",
             "selected_option",
+            "time_taken",
         ]
-        read_only_fields = ["id"]
 
     def validate(self, attrs):
-        """
-        Ensure the question belongs to the quiz's subtopic.
-        Prevent inconsistent answers.
-        """
+        # basic null safety only (NO business logic here)
+        if not attrs.get("question"):
+            raise serializers.ValidationError("Question is required")
 
-        attempt = attrs.get("quiz_attempt")
-        question = attrs.get("question")
-
-        if question.sub_topic != attempt.sub_topic:
-            raise serializers.ValidationError(
-                "Question does not belong to this quiz."
-            )
+        if not attrs.get("selected_option"):
+            raise serializers.ValidationError("Selected option is required")
 
         return attrs
 
 
-class StudentAnswerReadSerializer(serializers.ModelSerializer):
-    """
-    Used when returning answers with results.
-    """
 
+# STUDENT ANSWER (READ)
+class StudentAnswerReadSerializer(serializers.ModelSerializer):
     question_text = serializers.CharField(
-        source="question.question_text", read_only=True
+        source="question.question_text",
+        read_only=True
     )
 
     class Meta:
@@ -59,53 +222,46 @@ class StudentAnswerReadSerializer(serializers.ModelSerializer):
             "selected_option",
             "is_correct",
             "marks_awarded",
+            "time_taken",
             "answered_at",
         ]
 
 
-
-# Quiz Attempt Serializers
-
-
+# QUIZ ATTEMPT (CREATE)
 class QuizAttemptCreateSerializer(serializers.ModelSerializer):
-    """
-    Serializer used when starting a quiz.
-    """
+    sub_topic_name = serializers.CharField(
+        source="sub_topic.sub_topic_name",
+        read_only=True
+    )
 
     class Meta:
         model = QuizAttempt
         fields = [
             "id",
             "sub_topic",
+            "sub_topic_name",
             "total_questions",
-            "total_marks",
-            "negative_marking_flag",
-            "negative_marking",
             "time_limit",
         ]
         read_only_fields = ["id"]
 
     def create(self, validated_data):
-        """
-        Automatically attach the logged-in student.
-        """
-        user = self.context["request"].user
+        request = self.context["request"]
 
+        # FIX: always assign student
         return QuizAttempt.objects.create(
-            student=user,
             **validated_data
         )
 
 
+# QUIZ ATTEMPT (LIST)
 class QuizAttemptListSerializer(serializers.ModelSerializer):
-    """
-    Lightweight serializer for listing attempts.
-    """
-
     sub_topic_name = serializers.CharField(
         source="sub_topic.sub_topic_name",
         read_only=True
     )
+
+    duration_taken = serializers.SerializerMethodField()
 
     class Meta:
         model = QuizAttempt
@@ -117,14 +273,19 @@ class QuizAttemptListSerializer(serializers.ModelSerializer):
             "status",
             "started_at",
             "completed_at",
+            "duration_taken",
         ]
 
+    def get_duration_taken(self, obj):
+        if obj.completed_at and obj.started_at:
+            return (obj.completed_at - obj.started_at).seconds
+        return 0
+
+
+
+# QUIZ ATTEMPT (DETAIL)
 
 class QuizAttemptDetailSerializer(serializers.ModelSerializer):
-    """
-    Detailed serializer including answers and results.
-    """
-
     answers = StudentAnswerReadSerializer(many=True, read_only=True)
 
     sub_topic_name = serializers.CharField(
@@ -132,25 +293,32 @@ class QuizAttemptDetailSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    duration_taken = serializers.SerializerMethodField()
+
     class Meta:
         model = QuizAttempt
         fields = [
             "id",
-            "student",
             "sub_topic",
             "sub_topic_name",
             "total_questions",
-            "total_marks",
-            "negative_marking_flag",
-            "negative_marking",
             "time_limit",
+
             "started_at",
             "completed_at",
+
             "score",
             "correct_answers",
             "wrong_answers",
             "skipped_questions",
             "accuracy",
             "status",
+
+            "duration_taken",
             "answers",
         ]
+
+    def get_duration_taken(self, obj):
+        if obj.completed_at and obj.started_at:
+            return (obj.completed_at - obj.started_at).seconds
+        return 0
