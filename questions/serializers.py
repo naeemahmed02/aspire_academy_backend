@@ -21,6 +21,7 @@ class QuestionWriteSerializer(serializers.ModelSerializer):
             "id",
             "question_text",
             "sub_topic",
+            "image",
             "option_a",
             "option_b",
             "option_c",

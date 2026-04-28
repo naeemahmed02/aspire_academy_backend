@@ -181,7 +181,6 @@ from quizzes.services.scoring_service import ScoringService
 #         )
 
 
-
 class QuizAttemptViewSet(viewsets.ModelViewSet):
 
     permission_classes = [permissions.IsAuthenticated]
@@ -203,8 +202,8 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
     # =========================
     # CREATE ATTEMPT
     # =========================
-    def perform_create(self, serializer):
-        serializer.save(student=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(student=self.request.user)
     # def perform_create(self, serializer):
     #     attempt = QuizAttemptService.create_attempt(
     #         student=self.request.user,
@@ -212,6 +211,31 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
     #         data=serializer.validated_data
     #     )
     #     return attempt
+
+    @action(detail=False, methods=["get"])
+    def recent(self, request):
+        attempts = QuizAttempt.objects.filter(
+            student=request.user,
+            status="COMPLETED"
+        ).order_by("-completed_at")[:5]
+
+        serializer = QuizAttemptListSerializer(attempts, many=True)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        attempt = QuizAttemptService.create_attempt(
+            student=request.user,
+            sub_topic_id=serializer.validated_data["sub_topic"].id,
+            data=serializer.validated_data,
+        )
+
+        return Response(
+            QuizAttemptCreateSerializer(attempt, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     # =========================
     # GET QUESTIONS
@@ -223,16 +247,14 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
 
         if attempt.status == "COMPLETED":
             return Response(
-                {"error": "Quiz already completed"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Quiz already completed"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         if attempt.questions.exists():
             questions = attempt.questions.all()
         else:
             qs = Question.objects.filter(
-                sub_topic=attempt.sub_topic,
-                status="published"
+                sub_topic=attempt.sub_topic, status="published"
             )
 
             ids = list(qs.values_list("id", flat=True))
@@ -240,13 +262,10 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
             if not ids:
                 return Response(
                     {"error": "No questions available"},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            selected_ids = random.sample(
-                ids,
-                min(len(ids), attempt.total_questions)
-            )
+            selected_ids = random.sample(ids, min(len(ids), attempt.total_questions))
 
             questions = qs.filter(id__in=selected_ids)
             attempt.questions.set(questions)
@@ -278,15 +297,11 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
             if attempt.status == "COMPLETED":
                 return Response(
                     {"error": "Quiz already completed"},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
             serializer = StudentAnswerWriteSerializer(
-                data=request.data,
-                context={
-                    "request": request,
-                    "attempt": attempt
-                }
+                data=request.data, context={"request": request, "attempt": attempt}
             )
 
             serializer.is_valid(raise_exception=True)
@@ -298,24 +313,23 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
                 attempt=attempt,
                 question=question,
                 selected_option=selected,
-                time_taken=serializer.validated_data.get("time_taken", 0)
+                time_taken=serializer.validated_data.get("time_taken", 0),
             )
 
             if error:
-                return Response(
-                    {"error": error},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({
-                "is_correct": answer.is_correct,
-                "marks_awarded": answer.marks_awarded
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "is_correct": answer.is_correct,
+                    "marks_awarded": answer.marks_awarded,
+                },
+                status=status.HTTP_200_OK,
+            )
 
         except Exception as e:
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     # =========================
@@ -328,8 +342,7 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
 
         if attempt.status == "COMPLETED":
             return Response(
-                {"error": "Already completed"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Already completed"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         with transaction.atomic():
@@ -338,6 +351,5 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
             QuizAttemptService.complete_attempt(attempt)
 
         return Response(
-            QuizAttemptDetailSerializer(attempt).data,
-            status=status.HTTP_200_OK
+            QuizAttemptDetailSerializer(attempt).data, status=status.HTTP_200_OK
         )

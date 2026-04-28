@@ -26,6 +26,8 @@ class Question(models.Model):
         db_index=True
     )
 
+    image = models.ImageField(upload_to="question_images/", null=True, blank=True)
+
     # Options
     option_a = models.TextField()
     option_b = models.TextField()

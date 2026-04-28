@@ -74,7 +74,7 @@ class StudentAnswer(models.Model):
     )
 
     selected_option = models.CharField(
-        max_length=1,
+        max_length=1,           
         null=True,
         blank=True
     )
