@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ENVIRONMENT
 # =========================================================
 
+
 def env(key, default=None, cast=str):
     value = os.getenv(key, default)
 
@@ -23,9 +24,9 @@ def env(key, default=None, cast=str):
 
 DEBUG = False
 
-SECRET_KEY = 'gst*%3n08%m&tvotr%%j9kb34g^lt4cr5r2nx7^meredp!(x^5'
+SECRET_KEY = "gst*%3n08%m&tvotr%%j9kb34g^lt4cr5r2nx7^meredp!(x^5"
 
-ALLOWED_HOSTS = ['aspireacademy.pythonanywhere.com']
+ALLOWED_HOSTS = ["aspireacademy.pythonanywhere.com"]
 
 
 # =========================================================
@@ -33,26 +34,20 @@ ALLOWED_HOSTS = ['aspireacademy.pythonanywhere.com']
 # =========================================================
 
 INSTALLED_APPS = [
-
     "unfold",
     "unfold.contrib.import_export",
-
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Third-party
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
-    'import_export',
-
-
-
+    "import_export",
     # Local Apps
     "accounts",
     "academics",
@@ -60,8 +55,6 @@ INSTALLED_APPS = [
     "progress",
     "quizzes",
 ]
-
-
 
 
 UNFOLD = {
@@ -75,22 +68,15 @@ UNFOLD = {
 # =========================================================
 
 MIDDLEWARE = [
-
     "django.middleware.security.SecurityMiddleware",
-
     # Whitenoise for static serving
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
     "corsheaders.middleware.CorsMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-
     "django.middleware.csrf.CsrfViewMiddleware",
-
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -98,7 +84,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = "aspire_academy_badin.urls"
 
 WSGI_APPLICATION = "aspire_academy_badin.wsgi.application"
-
 
 
 # =========================================================
@@ -111,24 +96,23 @@ if env("USE_POSTGRES", False, bool):
 
     DATABASES = {
         "default": {
-            "ENGINE":"django.db.backends.postgresql",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": env("DB_NAME"),
             "USER": env("DB_USER"),
             "PASSWORD": env("DB_PASSWORD"),
             "HOST": env("DB_HOST"),
-            "PORT": env("DB_PORT","5432"),
-            "CONN_MAX_AGE":600,
+            "PORT": env("DB_PORT", "5432"),
+            "CONN_MAX_AGE": 600,
         }
     }
 
 else:
     DATABASES = {
-        "default":{
-            "ENGINE":"django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3"
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 
 
 # =========================================================
@@ -140,23 +124,12 @@ AUTH_USER_MODEL = "accounts.Account"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME":
-        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME":
-        "django.contrib.auth.password_validation.MinimumLengthValidator"
-    },
-    {
-        "NAME":
-        "django.contrib.auth.password_validation.CommonPasswordValidator"
-    },
-    {
-        "NAME":
-        "django.contrib.auth.password_validation.NumericPasswordValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
-
 
 
 # =========================================================
@@ -164,31 +137,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # =========================================================
 
 REST_FRAMEWORK = {
-
-    "DEFAULT_AUTHENTICATION_CLASSES":(
+    "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-
-    "DEFAULT_PERMISSION_CLASSES":(
-        "rest_framework.permissions.IsAuthenticated",
-    ),
-
-    "DEFAULT_FILTER_BACKENDS":[
-        "django_filters.rest_framework.DjangoFilterBackend"
-    ],
-
-    "DEFAULT_THROTTLE_CLASSES":[
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_RATES": {
-    "anon": "20/min",
-    "user": "300/min",
-    "auth": "10/min",
+        "anon": "20/min",
+        "user": "300/min",
+        "auth": "10/min",
+    },
 }
-}
-
 
 
 # =========================================================
@@ -196,20 +161,12 @@ REST_FRAMEWORK = {
 # =========================================================
 
 SIMPLE_JWT = {
-
-    "ACCESS_TOKEN_LIFETIME":
-        timedelta(minutes=7200),
-
-    "REFRESH_TOKEN_LIFETIME":
-        timedelta(days=7),
-
-    "ROTATE_REFRESH_TOKENS":True,
-
-    "BLACKLIST_AFTER_ROTATION":True,
-
-    "AUTH_HEADER_TYPES":("Bearer",),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=525960),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=365),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
-
 
 
 # =========================================================
@@ -249,68 +206,58 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 
-
 # =========================================================
 # TEMPLATES
 # =========================================================
 
 TEMPLATES = [
-{
-    "BACKEND":
-        "django.template.backends.django.DjangoTemplates",
-
-    "DIRS":[],
-
-    "APP_DIRS":True,
-
-    "OPTIONS":{
-        "context_processors":[
-            "django.template.context_processors.request",
-            "django.contrib.auth.context_processors.auth",
-            "django.contrib.messages.context_processors.messages",
-        ]
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ]
+        },
     }
-}
 ]
-
 
 
 # =========================================================
 # STATIC / MEDIA
 # =========================================================
 
-STATIC_URL="/static/"
+STATIC_URL = "/static/"
 
-STATIC_ROOT=BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_DIRS=[
+STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-STATICFILES_STORAGE=(
- "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_URL="/media/"
-MEDIA_ROOT=BASE_DIR / "media"
-
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================================================
 # INTERNATIONALIZATION
 # =========================================================
 
-LANGUAGE_CODE="en-us"
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE="UTC"
+TIME_ZONE = "UTC"
 
-USE_I18N=True
+USE_I18N = True
 
-USE_TZ=True
+USE_TZ = True
 
 
-DEFAULT_AUTO_FIELD="django.db.models.BigAutoField"
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # =========================================================
@@ -318,22 +265,19 @@ DEFAULT_AUTO_FIELD="django.db.models.BigAutoField"
 # =========================================================
 
 LOGGING = {
-
-"version":1,
-"disable_existing_loggers":False,
-
-"handlers":{
-    "file":{
-        "class":"logging.FileHandler",
-        "filename":"django.log",
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "django.log",
+        },
     },
-},
-
-"loggers":{
-    "django":{
-        "handlers":["file"],
-        "level":"ERROR",
-        "propagate":True,
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
+        },
     },
-},
 }

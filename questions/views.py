@@ -96,3 +96,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
             "count": len(random_ids),
             "results": serializer.data
         })
+
+
+    @action(detail=False, methods=["get"])
+    def stats(self, request):
+        return Response({
+            "total": self.get_queryset().count(),
+            "published": self.get_queryset().filter(status="published").count(),
+            "draft": self.get_queryset().filter(status="draft").count(),
+        })
