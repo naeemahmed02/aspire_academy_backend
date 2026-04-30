@@ -1,11 +1,14 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from .models import Question
+from unfold.admin import ModelAdmin
+from import_export.admin import ImportExportModelAdmin
+from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
+from django.utils.html import format_html
 
 
-# --------------------------------------------------
-# Custom Admin Actions
-# --------------------------------------------------
+# =========================================================
+# Actions
+# =========================================================
 @admin.action(description="Mark selected questions as Published")
 def make_published(modeladmin, request, queryset):
     queryset.update(status="published")
@@ -16,12 +19,15 @@ def make_draft(modeladmin, request, queryset):
     queryset.update(status="draft")
 
 
-# --------------------------------------------------
-# Question Admin
-# --------------------------------------------------
+# =========================================================
+# Admin
+# =========================================================
 @admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
+class QuestionAdmin(ModelAdmin, ImportExportModelAdmin):
 
+    # -----------------------------
+    # LIST DISPLAY
+    # -----------------------------
     list_display = (
         "short_question",
         "subject_name",
@@ -51,11 +57,17 @@ class QuestionAdmin(admin.ModelAdmin):
     )
 
     ordering = ("-created_at",)
+    list_per_page = 25
 
     readonly_fields = ("created_by", "created_at", "updated_at")
 
     actions = [make_published, make_draft]
+    import_form_class = ImportForm
+    export_form_class = ExportForm
 
+    # -----------------------------
+    # FIELDSETS
+    # -----------------------------
     fieldsets = (
         ("Question Information", {
             "fields": (
@@ -91,49 +103,54 @@ class QuestionAdmin(admin.ModelAdmin):
         }),
     )
 
-    # --------------------------------------------------
-    # Query Optimization
-    # --------------------------------------------------
+    # -----------------------------
+    # OPTIMIZATION
+    # -----------------------------
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related(
+        return super().get_queryset(request).select_related(
             "sub_topic__main_topic__subject",
             "created_by"
         )
 
-    # --------------------------------------------------
-    # Auto-assign created_by
-    # --------------------------------------------------
+    # -----------------------------
+    # AUTO SET USER
+    # -----------------------------
     def save_model(self, request, obj, form, change):
-        if not obj.created_by:
+        if not obj.created_by_id:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
 
-    # --------------------------------------------------
-    # Custom Display Helpers
-    # --------------------------------------------------
+    # -----------------------------
+    # DISPLAY HELPERS
+    # -----------------------------
     def short_question(self, obj):
-        return obj.question_text[:60] + "..." if len(obj.question_text) > 60 else obj.question_text
+        return (obj.question_text[:70] + "...") if len(obj.question_text) > 70 else obj.question_text
+
     short_question.short_description = "Question"
 
     def subject_name(self, obj):
         return obj.sub_topic.main_topic.subject.subject_name
-    subject_name.admin_order_field = "sub_topic__main_topic__subject__subject_name"
+
     subject_name.short_description = "Subject"
+    subject_name.admin_order_field = "sub_topic__main_topic__subject__subject_name"
 
     def main_topic_name(self, obj):
         return obj.sub_topic.main_topic.topic_name
-    main_topic_name.admin_order_field = "sub_topic__main_topic__topic_name"
-    main_topic_name.short_description = "Main Topic"
 
+    main_topic_name.short_description = "Main Topic"
+    main_topic_name.admin_order_field = "sub_topic__main_topic__topic_name"
+
+    # -----------------------------
+    # STATUS BADGE (FIXED)
+    # -----------------------------
     def status_badge(self, obj):
-        if obj.status == "published":
-            color = "green"
-        else:
-            color = "red"
+        color = "#16a34a" if obj.status == "published" else "#dc2626"
+        label = "Published" if obj.status == "published" else "Draft"
+
         return format_html(
-            '<span style="color: {}; font-weight: bold;">{}</span>',
+            '<span style="padding:4px 10px; border-radius:6px; background:{}; color:white; font-weight:600;">{}</span>',
             color,
-            obj.status.capitalize(),
+            label
         )
+
     status_badge.short_description = "Status"

@@ -6,7 +6,7 @@ from .models import Account
 
 
 # --------------------------------------------------
-# Custom User Creation Form
+# User Creation Form
 # --------------------------------------------------
 class AccountCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
@@ -14,7 +14,13 @@ class AccountCreationForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        fields = ("email", "username", "first_name", "last_name", "phone_number")
+        fields = (
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "phone_number",
+        )
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -22,18 +28,21 @@ class AccountCreationForm(forms.ModelForm):
 
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords do not match")
+
         return password2
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
+
         if commit:
             user.save()
+
         return user
 
 
 # --------------------------------------------------
-# Custom User Change Form
+# User Change Form
 # --------------------------------------------------
 class AccountChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField()
@@ -44,10 +53,11 @@ class AccountChangeForm(forms.ModelForm):
 
 
 # --------------------------------------------------
-# Account Admin
+# Account Admin (Django + Unfold compatible)
 # --------------------------------------------------
 @admin.register(Account)
 class AccountAdmin(UserAdmin):
+
     form = AccountChangeForm
     add_form = AccountCreationForm
 
@@ -56,7 +66,7 @@ class AccountAdmin(UserAdmin):
         "username",
         "first_name",
         "last_name",
-        'student_id',
+        "student_id",
         "is_teacher",
         "is_student",
         "is_staff",
@@ -83,34 +93,57 @@ class AccountAdmin(UserAdmin):
 
     ordering = ("-date_joined",)
 
-    readonly_fields = ("date_joined", "last_login")
+    readonly_fields = (
+        "date_joined",
+        "last_login",
+    )
 
+    # --------------------------------------------------
+    # Field layout (CHANGE FORM)
+    # --------------------------------------------------
     fieldsets = (
         ("Login Credentials", {
-            "fields": ("email", "username", "password")
+            "fields": (
+                "email",
+                "username",
+                "password",
+            )
         }),
         ("Personal Information", {
-            "fields": ("first_name", "last_name", "phone_number")
+            "fields": (
+                "first_name",
+                "last_name",
+                "phone_number",
+                "student_id",
+            )
         }),
         ("Roles", {
-            "fields": ("is_teacher", "is_student")
+            "fields": (
+                "is_teacher",
+                "is_student",
+            )
         }),
         ("Permissions", {
             "fields": (
                 "is_active",
                 "is_staff",
-                "is_admin",
                 "is_superuser",
                 "groups",
                 "user_permissions",
             )
         }),
         ("Important Dates", {
-            "fields": ("date_joined", "last_login"),
+            "fields": (
+                "date_joined",
+                "last_login",
+            ),
             "classes": ("collapse",),
         }),
     )
 
+    # --------------------------------------------------
+    # Field layout (ADD FORM)
+    # --------------------------------------------------
     add_fieldsets = (
         ("Create New User", {
             "classes": ("wide",),
@@ -120,6 +153,7 @@ class AccountAdmin(UserAdmin):
                 "first_name",
                 "last_name",
                 "phone_number",
+                "student_id",
                 "password1",
                 "password2",
                 "is_teacher",
@@ -129,3 +163,12 @@ class AccountAdmin(UserAdmin):
             ),
         }),
     )
+
+    # --------------------------------------------------
+    # Auto password handling safety (Django standard)
+    # --------------------------------------------------
+    def save_model(self, request, obj, form, change):
+        if not change and obj.password:
+            obj.set_password(obj.password)
+
+        super().save_model(request, obj, form, change)

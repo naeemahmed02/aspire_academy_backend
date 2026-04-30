@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.db.models import Count, Q
 
 from .models import Subject, MainTopic, SubTopic
 from .serializers import (
@@ -67,7 +68,17 @@ class MainTopicViewSet(viewsets.ModelViewSet):
 # SUB TOPIC VIEWSET
 class SubTopicViewSet(viewsets.ModelViewSet):
 
-    queryset = SubTopic.objects.all().select_related("main_topic", "main_topic__subject")
+    queryset = SubTopic.objects.annotate(
+        total_questions=Count(
+            'questions',
+            filter=Q(questions__status='published')
+        )
+    ).filter(
+        total_questions__gt=0
+    ).select_related(
+        "main_topic",
+        "main_topic__subject"
+    )
     permission_classes = [permissions.IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend]

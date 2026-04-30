@@ -97,6 +97,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
 
+    profile_image = models.ImageField(
+    upload_to='profile_images/',
+    default='profile_images/default.png',
+    null=True,
+    blank=True
+)
+
     # unique student_id
     student_id = models.CharField(
         max_length = 20,

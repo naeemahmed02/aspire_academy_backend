@@ -1,14 +1,28 @@
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    StudentProgressSummaryViewSet
+    StudentProgressSummaryViewSet,
+    StudentDashboardAPIView,
 )
 
 router = DefaultRouter()
 
 router.register(
-    "progress",
+    r'progress',
     StudentProgressSummaryViewSet,
-    basename="progress"
+    basename='progress'
 )
 
-urlpatterns = router.urls
+urlpatterns = [
+    path(
+        "student-dashboard/",
+        StudentDashboardAPIView.as_view(),
+        name="student-dashboard"
+    ),
+
+    path(
+        "",
+        include(router.urls)
+    ),
+]

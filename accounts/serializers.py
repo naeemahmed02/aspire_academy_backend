@@ -16,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "username",
+            "profile_image",
             "is_student",
             'is_teacher',
             'student_id',
@@ -43,9 +44,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         if Account.objects.filter(email = value).exists():
             raise serializers.ValidationError("Email is already in use.")
-        
+
         return value
-    
+
     def create(self, validated_data):
         user = Account.objects.create_user( # type: ignore
             email = validated_data["email"],
@@ -55,14 +56,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             username = validated_data['username']
         )
         return user
-    
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
 
     def validate(self, attrs):
-        
+
         email = attrs.get("email")
         password = attrs.get("password")
 
@@ -70,10 +71,10 @@ class LoginSerializer(serializers.Serializer):
 
         if not user:
             raise serializers.ValidationError("Invalid email or password.")
-        
+
         if not user.is_active:
             raise serializers.ValidationError("User account is disabled.")
-        
+
         refresh = RefreshToken.for_user(user)
 
         return {
@@ -81,7 +82,7 @@ class LoginSerializer(serializers.Serializer):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         }
-    
+
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True, min_length=8)
@@ -91,7 +92,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         if not user.check_password(attrs["old_password"]):
             raise serializers.ValidationError("Old password is incorrect.")
-        
+
         return attrs
 
     def save(self, **kwargs):

@@ -1,11 +1,13 @@
 from django.contrib import admin
-from django.db.models import F
+from unfold.admin import ModelAdmin
 from .models import StudentProgressSummary
 
 
-# StudentProgressSummary Admin
+# --------------------------------------------------
+# Student Progress Summary Admin
+# --------------------------------------------------
 @admin.register(StudentProgressSummary)
-class StudentProgressSummaryAdmin(admin.ModelAdmin):
+class StudentProgressSummaryAdmin(ModelAdmin):
 
     list_display = (
         "student",
@@ -34,6 +36,7 @@ class StudentProgressSummaryAdmin(admin.ModelAdmin):
     )
 
     ordering = ("-last_attempt_at",)
+
     readonly_fields = (
         "student",
         "sub_topic",
@@ -49,7 +52,10 @@ class StudentProgressSummaryAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Student & Topic", {
-            "fields": ("student", "sub_topic")
+            "fields": (
+                "student",
+                "sub_topic",
+            )
         }),
         ("Performance Metrics", {
             "fields": (
@@ -63,25 +69,33 @@ class StudentProgressSummaryAdmin(admin.ModelAdmin):
             )
         }),
         ("Metadata", {
-            "fields": ("last_attempt_at",),
+            "fields": (
+                "last_attempt_at",
+            ),
             "classes": ("collapse",),
         }),
     )
 
+    # --------------------------------------------------
+    # Query Optimization
+    # --------------------------------------------------
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related(
+        return super().get_queryset(request).select_related(
             "student",
-            "sub_topic__main_topic__subject"
+            "sub_topic__main_topic__subject",
         )
 
+    # --------------------------------------------------
+    # Display Helpers
+    # --------------------------------------------------
     def subject_name(self, obj):
         return obj.sub_topic.main_topic.subject.subject_name
+
     subject_name.admin_order_field = "sub_topic__main_topic__subject__subject_name"
     subject_name.short_description = "Subject"
 
     def main_topic_name(self, obj):
         return obj.sub_topic.main_topic.topic_name
+
     main_topic_name.admin_order_field = "sub_topic__main_topic__topic_name"
     main_topic_name.short_description = "Main Topic"
-

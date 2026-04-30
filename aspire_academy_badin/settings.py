@@ -21,17 +21,11 @@ def env(key, default=None, cast=str):
     return value
 
 
-DEBUG = env("DEBUG", False, bool)
+DEBUG = False
 
-SECRET_KEY = env(
-    "SECRET_KEY",
-    "CHANGE-ME-IN-PRODUCTION"
-)
+SECRET_KEY = 'gst*%3n08%m&tvotr%%j9kb34g^lt4cr5r2nx7^meredp!(x^5'
 
-ALLOWED_HOSTS = env(
-    "ALLOWED_HOSTS",
-    "yourusername.pythonanywhere.com"
-).split(",")
+ALLOWED_HOSTS = ['aspireacademy.pythonanywhere.com']
 
 
 # =========================================================
@@ -40,7 +34,9 @@ ALLOWED_HOSTS = env(
 
 INSTALLED_APPS = [
 
-    # Django
+    "unfold",
+    "unfold.contrib.import_export",
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -53,6 +49,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
+    'import_export',
+
+
 
     # Local Apps
     "accounts",
@@ -62,6 +61,14 @@ INSTALLED_APPS = [
     "quizzes",
 ]
 
+
+
+
+UNFOLD = {
+    "SITE_TITLE": "Aspire Academy Admin",
+    "SITE_HEADER": "Aspire Academy",
+    "SITE_SUBHEADER": "Learning Platform",
+}
 
 # =========================================================
 # MIDDLEWARE
@@ -175,10 +182,11 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
 
-    "DEFAULT_THROTTLE_RATES":{
-        "anon":"20/min",
-        "user":"300/min",
-    }
+    "DEFAULT_THROTTLE_RATES": {
+    "anon": "20/min",
+    "user": "300/min",
+    "auth": "10/min",
+}
 }
 
 
@@ -190,7 +198,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
 
     "ACCESS_TOKEN_LIFETIME":
-        timedelta(minutes=30),
+        timedelta(minutes=7200),
 
     "REFRESH_TOKEN_LIFETIME":
         timedelta(days=7),
@@ -208,14 +216,12 @@ SIMPLE_JWT = {
 # CORS / CSRF
 # =========================================================
 
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "https://yourfrontend.com",
-]
+CORS_ALLOWED_ORIGINS = []
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://yourusername.pythonanywhere.com",
+    "https://aspireacademy.pythonanywhere.com",
 ]
 
 
@@ -233,7 +239,8 @@ SESSION_COOKIE_SECURE = not DEBUG
 
 CSRF_COOKIE_SECURE = not DEBUG
 
-SECURE_SSL_REDIRECT = not DEBUG
+# SECURE_SSL_REDIRECT = not DEBUG
+SECURE_SSL_REDIRECT = False
 
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 
