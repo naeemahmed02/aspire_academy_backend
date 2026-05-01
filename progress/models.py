@@ -31,7 +31,7 @@ class UserActivityEvent(models.Model):
         ("QUIZ_ATTEMPT", "Quiz Attempt"),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
     created_at = models.DateTimeField(auto_now_add=True)
 
