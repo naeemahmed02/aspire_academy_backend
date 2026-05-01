@@ -261,6 +261,11 @@ class QuizAttemptListSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    current_streak = serializers.IntegerField(
+        source="student.current_streak",
+        read_only=True
+    )
+
     duration_taken = serializers.SerializerMethodField()
 
     class Meta:
@@ -271,6 +276,7 @@ class QuizAttemptListSerializer(serializers.ModelSerializer):
             "score",
             "accuracy",
             "status",
+            "current_streak",
             "started_at",
             "completed_at",
             "duration_taken",
