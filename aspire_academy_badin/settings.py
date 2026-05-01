@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "accounts",
     "academics",
     "questions",
+    "announcement",
     "progress",
     "quizzes",
 ]

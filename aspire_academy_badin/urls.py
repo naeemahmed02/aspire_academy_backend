@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/", include("questions.urls")),
     path("api/", include("quizzes.urls")),
     path("api/", include("progress.urls")),
+    path("api/", include("announcement.api.urls")),
 ]
 
 
