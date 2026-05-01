@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -72,6 +73,15 @@ class StudentProgressSummaryViewSet(viewsets.ReadOnlyModelViewSet):
             return StudentProgressSummaryListSerializer
 
         return StudentProgressSummaryDetailSerializer
+
+    @action(detail=False, methods=["get"], url_path="user-stats")
+    def user_stats(self, request):
+        user = request.user
+
+        return Response({
+            "current_streak": user.current_streak,
+            "max_streak": user.max_streak,
+        })
 
 
 # =========================================================
@@ -239,3 +249,5 @@ class StudentDashboardAPIView(APIView):
             "weekly_trend":
                 weekly_trend,
         })
+
+
