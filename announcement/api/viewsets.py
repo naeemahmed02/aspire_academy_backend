@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .models import Announcement
+from announcement.models import Announcement
 from .serializers import AnnouncementSerializer
 from rest_framework.permissions import IsAdminUser
 
