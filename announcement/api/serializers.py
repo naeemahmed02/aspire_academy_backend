@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Announcement
+from announcement.models import Announcement
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     class Meta:
