@@ -112,6 +112,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
         null = True,
     )
 
+    current_streak = models.IntegerField(default=0)
+    max_streak = models.IntegerField(default=0)
+    last_active_date = models.DateField(null=True, blank=True)
+
     # Role Flags
     is_teacher = models.BooleanField(default=False)
     is_student = models.BooleanField(default=False)

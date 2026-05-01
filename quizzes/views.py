@@ -20,6 +20,7 @@ from .serializers import (
 from quizzes.services.quiz_attempt_service import QuizAttemptService
 from quizzes.services.answer_service import AnswerService
 from quizzes.services.scoring_service import ScoringService
+from progress.services.streak_service import update_user_streak
 
 
 # class QuizAttemptViewSet(viewsets.ModelViewSet):
@@ -222,7 +223,11 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         serializer = QuizAttemptListSerializer(attempts, many=True)
         return Response(serializer.data)
 
+
+
+
     def create(self, request, *args, **kwargs):
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -232,8 +237,24 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
             data=serializer.validated_data,
         )
 
+        ###################################################
+        # UPDATE STREAK
+        ###################################################
+
+        streak = update_user_streak(request.user)
+
+        ###################################################
+
+        response_data = QuizAttemptCreateSerializer(
+            attempt,
+            context={"request": request}
+        ).data
+
+        # Optional: send streak in response
+        response_data["current_streak"] = streak
+
         return Response(
-            QuizAttemptCreateSerializer(attempt, context={"request": request}).data,
+            response_data,
             status=status.HTTP_201_CREATED,
         )
 

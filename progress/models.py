@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from academics.models import SubTopic
 from quizzes.models import QuizAttempt
+from accounts.models import Account
 
 class StudentProgressSummary(models.Model):
 
@@ -22,3 +23,17 @@ class StudentProgressSummary(models.Model):
 
     class Meta:
         unique_together = ("student", "sub_topic")  
+
+
+
+class UserActivityEvent(models.Model):
+    EVENT_TYPES = (
+        ("QUIZ_ATTEMPT", "Quiz Attempt"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.event_type}"
