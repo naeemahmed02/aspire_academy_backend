@@ -22,3 +22,9 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
 
         # Only teachers/admins can modify
         return [IsTeacherOrAdmin()]
+
+    def list(self, request, *args, **kwargs):
+        print("USER:", request.user)
+        print("AUTH:", request.user.is_authenticated)
+        print("ACTION:", self.action)
+        return super().list(request, *args, **kwargs)
