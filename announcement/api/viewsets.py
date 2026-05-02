@@ -7,12 +7,20 @@ from announcement.permissions.permissions import (
     IsAuthenticatedReadOnly,
 )
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = Announcement.objects.all().order_by('-created_at')
     serializer_class = AnnouncementSerializer
 
     def get_permissions(self):
+
+        logger.info(f"ACTION: {self.action}")
+        logger.info(f"USER: {self.request.user}")
+        logger.info(f"AUTH: {self.request.user.is_authenticated}")
         """
         Assign permissions based on action
         """
@@ -22,9 +30,3 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
 
         # Only teachers/admins can modify
         return [IsTeacherOrAdmin()]
-
-    def list(self, request, *args, **kwargs):
-        print("USER:", request.user)
-        print("AUTH:", request.user.is_authenticated)
-        print("ACTION:", self.action)
-        return super().list(request, *args, **kwargs)
