@@ -25,7 +25,6 @@ class Enrollment(models.Model):
     class Meta:
         unique_together = ("user", "course")
         indexes = [
-        models.Index(fields=["playlist"]),
         models.Index(fields=["order"]),
     ]
 
