@@ -19,7 +19,6 @@ class Playlist(models.Model):
         ordering = ["order"]
 
         indexes = [
-        models.Index(fields=["playlist"]),
         models.Index(fields=["order"]),
     ]
 
