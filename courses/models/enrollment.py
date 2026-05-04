@@ -24,9 +24,6 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = ("user", "course")
-        indexes = [
-        models.Index(fields=["order"]),
-    ]
 
     def __str__(self):
         return f"{self.user} -> {self.course}"
