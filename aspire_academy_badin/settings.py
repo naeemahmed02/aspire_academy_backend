@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "django_filters",
     "import_export",
     # Local Apps
+    "courses",
     "accounts",
     "academics",
     "questions",
