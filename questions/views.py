@@ -90,7 +90,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
         questions = queryset.filter(id__in=random_ids)
 
-        serializer = QuestionReadSerializer(questions, many=True)
+        serializer = QuestionReadSerializer(
+    questions,
+    many=True,
+    context={"request": request}
+)
 
         return Response({
             "count": len(random_ids),

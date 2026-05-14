@@ -128,6 +128,9 @@ class QuestionWriteSerializer(serializers.ModelSerializer):
 class QuestionReadSerializer(serializers.ModelSerializer):
     options = serializers.SerializerMethodField()
     answer = serializers.SerializerMethodField()
+
+    image = serializers.ImageField(read_only=True)
+
     sub_topic_name = serializers.CharField(
         source="sub_topic.sub_topic_name",
         read_only=True
@@ -138,15 +141,14 @@ class QuestionReadSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "question_text",
-            "options",      
-            "answer",       
+            "image", 
+            "options",
+            "answer",
             "hint",
             "explanation",
             "difficulty",
             "sub_topic_name",
-            
         ]
-
     def get_options(self, obj):
         return [
             obj.option_a,
